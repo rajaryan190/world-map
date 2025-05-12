@@ -1,0 +1,942 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+.bolt/config.json
+.bolt/prompt
+.gitignore
+eslint.config.js
+index.html
+package.json
+postcss.config.js
+src/App.tsx
+src/components/Game.tsx
+src/components/Landmark.tsx
+src/components/Map.tsx
+src/components/MapCountry.tsx
+src/components/ScoreBoard.tsx
+src/data/countriesData.ts
+src/data/gameData.ts
+src/index.css
+src/main.tsx
+src/types/index.ts
+src/utils/helpers.ts
+src/vite-env.d.ts
+tailwind.config.js
+tsconfig.app.json
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
+vite.config.ts.timestamp-1746989700046-e81f6865a28918.mjs
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".bolt/config.json">
+{
+  "template": "bolt-vite-react-ts"
+}
+</file>
+
+<file path=".bolt/prompt">
+For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.
+
+By default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.
+
+Use icons from lucide-react for logos.
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+</file>
+
+<file path="eslint.config.js">
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  { ignores: ['dist'] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  }
+);
+</file>
+
+<file path="index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Country Landmark Challenge</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="package.json">
+{
+  "name": "vite-react-typescript-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.0",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/d3-geo": "^3.1.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@types/topojson-client": "^3.1.4",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^5.4.2"
+  }
+}
+</file>
+
+<file path="postcss.config.js">
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+</file>
+
+<file path="src/App.tsx">
+import React from 'react';
+import { Game } from './components/Game';
+
+function App() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center p-4">
+      <Game />
+    </div>
+  );
+}
+
+export default App;
+</file>
+
+<file path="src/components/Game.tsx">
+import React, { useState, useEffect } from 'react';
+import { Map } from './Map';
+import { Landmark } from './Landmark';
+import { ScoreBoard } from './ScoreBoard';
+import { gameData } from '../data/gameData';
+import { shuffle } from '../utils/helpers';
+import { Trophy } from 'lucide-react';
+
+export const Game: React.FC = () => {
+  const [landmarks, setLandmarks] = useState(shuffle([...gameData]));
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [revealedCountries, setRevealedCountries] = useState<string[]>([]);
+  const [feedback, setFeedback] = useState<{ status: 'correct' | 'incorrect' | null, message: string }>({ 
+    status: null, 
+    message: '' 
+  });
+  const [gameOver, setGameOver] = useState(false);
+
+  const currentLandmark = landmarks[currentQuestionIndex];
+  
+  const handleCountryClick = (country: string) => {
+    if (revealedCountries.includes(country) || gameOver) {
+      return;
+    }
+
+    if (country === currentLandmark.country) {
+      setScore(prevScore => prevScore + 1);
+      setRevealedCountries(prev => [...prev, country]);
+      setFeedback({ 
+        status: 'correct', 
+        message: `Correct! ${currentLandmark.landmark} is in ${country}.` 
+      });
+      
+      setTimeout(() => {
+        if (currentQuestionIndex < landmarks.length - 1) {
+          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+          setFeedback({ status: null, message: '' });
+        } else {
+          setGameOver(true);
+        }
+      }, 1500);
+    } else {
+      setFeedback({ 
+        status: 'incorrect', 
+        message: `Incorrect. Try again!` 
+      });
+      
+      setTimeout(() => {
+        setFeedback({ status: null, message: '' });
+      }, 1500);
+    }
+  };
+
+  const restartGame = () => {
+    setLandmarks(shuffle([...gameData]));
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setRevealedCountries([]);
+    setFeedback({ status: null, message: '' });
+    setGameOver(false);
+  };
+
+  if (gameOver) {
+    return (
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500 animate-fade-in">
+        <div className="p-12 text-center bg-gradient-to-b from-blue-50 to-white">
+          <div className="mb-8 flex justify-center">
+            <Trophy size={80} className="text-yellow-500 drop-shadow-lg" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Game Over!</h1>
+          <p className="text-2xl text-gray-600 mb-8">
+            You scored <span className="font-bold text-blue-600">{score}</span> out of <span className="font-bold">{landmarks.length}</span>
+          </p>
+          <button 
+            onClick={restartGame}
+            className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Play Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500">
+      <div className="p-8 md:p-10">
+        <ScoreBoard 
+          score={score} 
+          totalQuestions={landmarks.length} 
+          currentQuestion={currentQuestionIndex + 1} 
+        />
+        
+        <div className="grid md:grid-cols-2 gap-8 mt-8">
+          <Landmark 
+            landmark={currentLandmark} 
+            feedback={feedback}
+          />
+          
+          <Map 
+            onCountryClick={handleCountryClick} 
+            revealedCountries={revealedCountries}
+            correctCountry={currentLandmark.country}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="src/components/Landmark.tsx">
+import React from 'react';
+import { LandmarkData } from '../types';
+import { MapPin } from 'lucide-react';
+
+interface LandmarkProps {
+  landmark: LandmarkData;
+  feedback: { status: 'correct' | 'incorrect' | null, message: string };
+}
+
+export const Landmark: React.FC<LandmarkProps> = ({ landmark, feedback }) => {
+  let feedbackClasses = '';
+  
+  if (feedback.status === 'correct') {
+    feedbackClasses = 'bg-green-100 border-green-500 text-green-700';
+  } else if (feedback.status === 'incorrect') {
+    feedbackClasses = 'bg-red-100 border-red-500 text-red-700';
+  }
+
+  return (
+    <div className="relative flex flex-col h-full">
+      <div className="relative overflow-hidden rounded-lg h-[200px] md:h-[300px] bg-gray-100">
+        <img
+          src={landmark.imageUrl}
+          alt={`Landmark`}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+          <div className="flex items-center text-white">
+            <MapPin size={20} className="mr-2" />
+            <h3 className="text-lg font-semibold">{landmark.landmark}</h3>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-4">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Which country is this landmark in?</h3>
+        
+        {feedback.message && (
+          <div className={`mt-4 p-3 border rounded-lg ${feedbackClasses} transition-all duration-300`}>
+            {feedback.message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="src/components/Map.tsx">
+import React, { useState, useEffect, useRef } from 'react';
+import { geoMercator, geoPath } from 'd3-geo';
+import { feature } from 'topojson-client';
+import { CountryFeature } from '../types';
+import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+
+interface MapProps {
+  onCountryClick: (country: string) => void;
+  revealedCountries: string[];
+  correctCountry: string;
+}
+
+const WORLD_TOPOJSON_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+
+export const Map: React.FC<MapProps> = ({ 
+  onCountryClick, 
+  revealedCountries,
+  correctCountry 
+}) => {
+  const [worldData, setWorldData] = useState<CountryFeature[] | null>(null);
+  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [scale, setScale] = useState(120);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    fetch(WORLD_TOPOJSON_URL)
+      .then(response => response.json())
+      .then(topology => {
+        const countries = feature(topology, topology.objects.countries);
+        setWorldData(countries.features as CountryFeature[]);
+      });
+  }, []);
+
+  const width = 800;
+  const height = 400;
+
+  const handleZoomIn = () => {
+    setScale(prev => Math.min(prev * 1.5, 500));
+  };
+
+  const handleZoomOut = () => {
+    setScale(prev => Math.max(prev / 1.5, 50));
+  };
+
+  const handleReset = () => {
+    setScale(120);
+  };
+
+  const projection = geoMercator()
+    .scale(scale)
+    .translate([width / 2, height / 1.5]);
+
+  const path = geoPath().projection(projection);
+
+  if (!worldData) {
+    return (
+      <div className="relative h-[300px] md:h-[400px] border border-gray-200 rounded-lg overflow-hidden bg-blue-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading map...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-[300px] md:h-[400px] border border-gray-200 rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-lg">
+      <div className="absolute inset-0 p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">Click on the correct country</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handleZoomIn}
+              className="p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+              title="Zoom in"
+            >
+              <ZoomIn size={20} className="text-gray-600" />
+            </button>
+            <button
+              onClick={handleZoomOut}
+              className="p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+              title="Zoom out"
+            >
+              <ZoomOut size={20} className="text-gray-600" />
+            </button>
+            <button
+              onClick={handleReset}
+              className="p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+              title="Reset zoom"
+            >
+              <Maximize2 size={20} className="text-gray-600" />
+            </button>
+          </div>
+        </div>
+        <div className="relative h-[calc(100%-3.5rem)] overflow-hidden rounded-lg border border-gray-100 bg-white shadow-inner">
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${width} ${height}`}
+            className="w-full h-full"
+          >
+            {worldData.map((country, i) => {
+              const isRevealed = revealedCountries.includes(country.properties.name);
+              const isHovered = hoveredCountry === country.properties.name;
+              
+              return (
+                <path
+                  key={i}
+                  d={path(country) || ''}
+                  fill={isRevealed ? '#22c55e' : isHovered ? '#60a5fa' : '#e5e7eb'}
+                  stroke="#fff"
+                  strokeWidth="0.5"
+                  className="transition-colors duration-200 cursor-pointer hover:opacity-80"
+                  onClick={() => onCountryClick(country.properties.name)}
+                  onMouseEnter={() => setHoveredCountry(country.properties.name)}
+                  onMouseLeave={() => setHoveredCountry(null)}
+                />
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+      {hoveredCountry && (
+        <div className="absolute bottom-6 left-6 bg-black bg-opacity-75 text-white text-sm px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
+          {hoveredCountry}
+        </div>
+      )}
+    </div>
+  );
+};
+</file>
+
+<file path="src/components/MapCountry.tsx">
+import React from 'react';
+import { CountryData } from '../types';
+
+interface MapCountryProps {
+  country: CountryData;
+  onCountryClick: (country: string) => void;
+  isRevealed: boolean;
+  isHovered: boolean;
+  isCorrect: boolean;
+  onHover: (hovered: boolean) => void;
+}
+
+export const MapCountry: React.FC<MapCountryProps> = ({ 
+  country, 
+  onCountryClick, 
+  isRevealed, 
+  isHovered,
+  isCorrect,
+  onHover 
+}) => {
+  const handleClick = () => {
+    onCountryClick(country.name);
+  };
+
+  // Calculate position based on coordinates
+  const style = {
+    left: `${country.position.x}%`,
+    top: `${country.position.y}%`,
+    transform: 'translate(-50%, -50%)',
+    width: `${country.size}px`,
+    height: `${country.size}px`,
+  };
+
+  let bgColor = 'bg-gray-200';
+  let textColor = 'text-gray-700';
+  
+  if (isRevealed) {
+    bgColor = 'bg-green-500';
+    textColor = 'text-white';
+  } else if (isHovered) {
+    bgColor = 'bg-blue-400';
+    textColor = 'text-white';
+  }
+
+  return (
+    <button
+      className={`absolute ${bgColor} ${textColor} rounded-full font-bold transition-all duration-300 flex items-center justify-center cursor-pointer hover:z-10 shadow-md`}
+      style={style}
+      onClick={handleClick}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+    >
+      {isRevealed ? country.name.substring(0, 2) : '?'}
+      {isHovered && (
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max">
+          <div className="bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+            {country.name}
+          </div>
+        </div>
+      )}
+    </button>
+  );
+};
+</file>
+
+<file path="src/components/ScoreBoard.tsx">
+import React from 'react';
+import { Globe } from 'lucide-react';
+
+interface ScoreBoardProps {
+  score: number;
+  totalQuestions: number;
+  currentQuestion: number;
+}
+
+export const ScoreBoard: React.FC<ScoreBoardProps> = ({ 
+  score, 
+  totalQuestions, 
+  currentQuestion 
+}) => {
+  return (
+    <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 rounded-lg shadow-md">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Globe size={28} className="mr-3" />
+          <h1 className="text-2xl md:text-3xl font-bold">Country Landmark Challenge</h1>
+        </div>
+        
+        <div className="flex items-center space-x-6">
+          <div className="text-center">
+            <p className="text-sm uppercase font-medium opacity-80">Question</p>
+            <p className="text-xl font-bold">{currentQuestion} / {totalQuestions}</p>
+          </div>
+          
+          <div className="text-center bg-white text-blue-800 px-4 py-2 rounded-lg">
+            <p className="text-sm uppercase font-medium">Score</p>
+            <p className="text-xl font-bold">{score}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="src/data/countriesData.ts">
+import { CountryData } from '../types';
+
+export const countriesData: CountryData[] = [
+  {
+    id: 1,
+    name: 'USA',
+    position: { x: 20, y: 30 },
+    size: 50
+  },
+  {
+    id: 2,
+    name: 'France',
+    position: { x: 45, y: 25 },
+    size: 40
+  },
+  {
+    id: 3,
+    name: 'UK',
+    position: { x: 43, y: 18 },
+    size: 35
+  },
+  {
+    id: 4,
+    name: 'Italy',
+    position: { x: 50, y: 30 },
+    size: 35
+  },
+  {
+    id: 5,
+    name: 'China',
+    position: { x: 75, y: 32 },
+    size: 55
+  },
+  {
+    id: 6,
+    name: 'India',
+    position: { x: 67, y: 40 },
+    size: 50
+  },
+  {
+    id: 7,
+    name: 'Brazil',
+    position: { x: 30, y: 60 },
+    size: 50
+  },
+  {
+    id: 8,
+    name: 'Australia',
+    position: { x: 82, y: 70 },
+    size: 45
+  },
+  {
+    id: 9,
+    name: 'Peru',
+    position: { x: 22, y: 55 },
+    size: 35
+  },
+  {
+    id: 10,
+    name: 'Egypt',
+    position: { x: 55, y: 40 },
+    size: 35
+  }
+];
+</file>
+
+<file path="src/data/gameData.ts">
+import { LandmarkData } from '../types';
+
+export const gameData: LandmarkData[] = [
+  {
+    id: 1,
+    landmark: 'Eiffel Tower',
+    country: 'France',
+    imageUrl: 'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This iconic iron tower is located in the capital city of a European country known for its cuisine.'
+  },
+  {
+    id: 2,
+    landmark: 'Statue of Liberty',
+    country: 'USA',
+    imageUrl: 'https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This copper statue was a gift from France and stands on Liberty Island.'
+  },
+  {
+    id: 3,
+    landmark: 'Taj Mahal',
+    country: 'India',
+    imageUrl: 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This white marble mausoleum was built by an emperor in memory of his wife.'
+  },
+  {
+    id: 4,
+    landmark: 'Great Wall',
+    country: 'China',
+    imageUrl: 'https://images.pexels.com/photos/1131407/pexels-photo-1131407.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This massive defensive structure spans thousands of miles across an Asian country.'
+  },
+  {
+    id: 5,
+    landmark: 'Colosseum',
+    country: 'Italy',
+    imageUrl: 'https://images.pexels.com/photos/532263/pexels-photo-532263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This ancient amphitheater in a European capital was used for gladiatorial contests.'
+  },
+  {
+    id: 6,
+    landmark: 'Christ the Redeemer',
+    country: 'Brazil',
+    imageUrl: 'https://images.pexels.com/photos/54610/rio-de-janeiro-christ-the-redeemer-statue-54610.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This art deco statue of Jesus Christ overlooks a South American city known for its carnival.'
+  },
+  {
+    id: 7,
+    landmark: 'Machu Picchu',
+    country: 'Peru',
+    imageUrl: 'https://images.pexels.com/photos/2105332/pexels-photo-2105332.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This 15th-century Inca citadel is located in the Eastern Cordillera of southern South America.'
+  },
+  {
+    id: 8,
+    landmark: 'Pyramids of Giza',
+    country: 'Egypt',
+    imageUrl: 'https://images.pexels.com/photos/71241/pexels-photo-71241.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'These ancient structures were built as tombs for pharaohs in a North African country.'
+  },
+  {
+    id: 9,
+    landmark: 'Sydney Opera House',
+    country: 'Australia',
+    imageUrl: 'https://images.pexels.com/photos/1878293/pexels-photo-1878293.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This performing arts center features distinctive sail-shaped shells.'
+  },
+  {
+    id: 10,
+    landmark: 'Big Ben',
+    country: 'UK',
+    imageUrl: 'https://images.pexels.com/photos/77171/pexels-photo-77171.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    hint: 'This famous clock tower is part of the Palace of Westminster in a European capital city.'
+  }
+];
+</file>
+
+<file path="src/index.css">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+</file>
+
+<file path="src/main.tsx">
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+</file>
+
+<file path="src/types/index.ts">
+export interface LandmarkData {
+  id: number;
+  landmark: string;
+  country: string;
+  imageUrl: string;
+  hint: string;
+}
+
+export interface CountryData {
+  id: number;
+  name: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  size: number;
+}
+
+export interface CountryFeature {
+  type: string;
+  properties: {
+    name: string;
+  };
+  geometry: {
+    type: string;
+    coordinates: number[][][];
+  };
+}
+</file>
+
+<file path="src/utils/helpers.ts">
+/**
+ * Shuffle an array using the Fisher-Yates algorithm
+ */
+export function shuffle<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+</file>
+
+<file path="src/vite-env.d.ts">
+/// <reference types="vite/client" />
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+</file>
+
+<file path="tsconfig.app.json">
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+</file>
+
+<file path="tsconfig.node.json">
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}
+</file>
+
+<file path="vite.config.ts">
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+});
+</file>
+
+<file path="vite.config.ts.timestamp-1746989700046-e81f6865a28918.mjs">
+// vite.config.ts
+import { defineConfig } from "file:///home/project/node_modules/vite/dist/node/index.js";
+import react from "file:///home/project/node_modules/@vitejs/plugin-react/dist/index.mjs";
+var vite_config_default = defineConfig({
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: ["lucide-react"]
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvaG9tZS9wcm9qZWN0XCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCIvaG9tZS9wcm9qZWN0L3ZpdGUuY29uZmlnLnRzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9ob21lL3Byb2plY3Qvdml0ZS5jb25maWcudHNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlJztcbmltcG9ydCByZWFjdCBmcm9tICdAdml0ZWpzL3BsdWdpbi1yZWFjdCc7XG5cbi8vIGh0dHBzOi8vdml0ZWpzLmRldi9jb25maWcvXG5leHBvcnQgZGVmYXVsdCBkZWZpbmVDb25maWcoe1xuICBwbHVnaW5zOiBbcmVhY3QoKV0sXG4gIG9wdGltaXplRGVwczoge1xuICAgIGV4Y2x1ZGU6IFsnbHVjaWRlLXJlYWN0J10sXG4gIH0sXG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFBeU4sU0FBUyxvQkFBb0I7QUFDdFAsT0FBTyxXQUFXO0FBR2xCLElBQU8sc0JBQVEsYUFBYTtBQUFBLEVBQzFCLFNBQVMsQ0FBQyxNQUFNLENBQUM7QUFBQSxFQUNqQixjQUFjO0FBQUEsSUFDWixTQUFTLENBQUMsY0FBYztBQUFBLEVBQzFCO0FBQ0YsQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K
+</file>
+
+</files>
