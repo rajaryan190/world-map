@@ -1,3 +1,5 @@
+
+// src/data/gameData.ts
 import { LandmarkData } from '../types';
 
 export const gameData: LandmarkData[] = [
@@ -6,71 +8,121 @@ export const gameData: LandmarkData[] = [
     id: 1,
     landmark: 'Eiffel Tower',
     country: 'France',
+    countryCode: 'FR',
     imageUrl: 'https://images.pexels.com/photos/460740/pexels-photo-460740.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This iconic iron tower is located in the capital city of a European country known for its cuisine.'
+    continent: 'Europe',
+    neighbors: ['Germany', 'Spain', 'Italy', 'Switzerland', 'Belgium', 'Luxembourg'],
+    languages: ['French'],
+    latitude: 48.8584,
+    longitude: 2.2945,
   },
   {
     id: 2,
     landmark: 'Statue of Liberty',
     country: 'United States of America',
+    countryCode: 'US',
     imageUrl: 'https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This copper statue was a gift from France and stands on Liberty Island.'
+    continent: 'North America',
+    neighbors: ['Canada', 'Mexico'],
+    languages: ['English'],
+    latitude: 40.6892,
+    longitude: -74.0445,
   },
   {
     id: 3,
     landmark: 'Taj Mahal',
     country: 'India',
+    countryCode: 'IN',
     imageUrl: 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This white marble mausoleum was built by an emperor in memory of his wife.'
+    continent: 'Asia',
+    neighbors: ['Pakistan', 'China', 'Nepal', 'Bhutan', 'Bangladesh', 'Myanmar'],
+    languages: ['Hindi', 'English'],
+    latitude: 27.1751,
+    longitude: 78.0421,
   },
   {
     id: 4,
     landmark: 'Great Wall',
     country: 'China',
+    countryCode: 'CN',
     imageUrl: 'https://images.pexels.com/photos/2412603/pexels-photo-2412603.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This massive defensive structure spans thousands of miles across an Asian country.'
+    continent: 'Asia',
+    neighbors: ['Russia', 'Mongolia', 'North Korea', 'Vietnam', 'India'], // Selected few
+    languages: ['Mandarin Chinese'],
+    latitude: 40.4319, // Approx. for a prominent section like Badaling
+    longitude: 116.5704,
   },
   {
     id: 5,
     landmark: 'Colosseum',
     country: 'Italy',
+    countryCode: 'IT',
     imageUrl: 'https://images.pexels.com/photos/532263/pexels-photo-532263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This ancient amphitheater in a European capital was used for gladiatorial contests.'
+    continent: 'Europe',
+    neighbors: ['France', 'Switzerland', 'Austria', 'Slovenia'],
+    languages: ['Italian'],
+    latitude: 41.8902,
+    longitude: 12.4922,
   },
   {
     id: 6,
     landmark: 'Christ the Redeemer',
     country: 'Brazil',
+    countryCode: 'BR',
     imageUrl: 'https://images.pexels.com/photos/2818895/pexels-photo-2818895.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This art deco statue of Jesus Christ overlooks a South American city known for its carnival.'
+    continent: 'South America',
+    neighbors: ['Argentina', 'Bolivia', 'Colombia', 'Paraguay', 'Peru', 'Uruguay', 'Venezuela'], // Selected
+    languages: ['Portuguese'],
+    latitude: -22.9519,
+    longitude: -43.2105,
   },
   {
     id: 7,
     landmark: 'Machu Picchu',
     country: 'Peru',
+    countryCode: 'PE',
     imageUrl: 'https://images.pexels.com/photos/2929906/pexels-photo-2929906.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This 15th-century Inca citadel is located in the Eastern Cordillera of southern South America.'
+    continent: 'South America',
+    neighbors: ['Ecuador', 'Colombia', 'Brazil', 'Bolivia', 'Chile'],
+    languages: ['Spanish', 'Quechua'],
+    latitude: -13.1631,
+    longitude: -72.5450,
   },
   {
     id: 8,
     landmark: 'Pyramids of Giza',
     country: 'Egypt',
+    countryCode: 'EG',
     imageUrl: 'https://images.pexels.com/photos/7566890/pexels-photo-7566890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'These ancient structures were built as tombs for pharaohs in a North African country.'
+    continent: 'Africa', // Straddles Africa and Asia (Sinai)
+    neighbors: ['Libya', 'Sudan', 'Israel'], // Gaza Strip omitted for simplicity as a hint
+    languages: ['Arabic'],
+    latitude: 29.9792,
+    longitude: 31.1342,
   },
   {
     id: 9,
     landmark: 'Sydney Opera House',
     country: 'Australia',
+    countryCode: 'AU',
     imageUrl: 'https://images.pexels.com/photos/1878293/pexels-photo-1878293.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This performing arts center features distinctive sail-shaped shells.'
+    continent: 'Oceania',
+    neighbors: [], // Island nation
+    languages: ['English'],
+    latitude: -33.8568,
+    longitude: 151.2153,
   },
   {
     id: 10,
     landmark: 'Big Ben',
     country: 'United Kingdom',
+    countryCode: 'GB',
     imageUrl: 'https://images.pexels.com/photos/77171/pexels-photo-77171.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This famous clock tower is part of the Palace of Westminster in a European capital city.'
+    continent: 'Europe',
+    neighbors: ['Ireland'], // Land border
+    languages: ['English'],
+    latitude: 51.5007,
+    longitude: -0.1246,
   },
 
   // --- Level 2 Data (25 New Entries) ---
@@ -78,175 +130,300 @@ export const gameData: LandmarkData[] = [
     id: 11,
     landmark: 'Brandenburg Gate',
     country: 'Germany',
+    countryCode: 'DE',
     imageUrl: 'https://images.pexels.com/photos/2570063/pexels-photo-2570063.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'An 18th-century neoclassical monument in Berlin.'
+    continent: 'Europe',
+    neighbors: ['Poland', 'Czech Republic', 'Austria', 'Switzerland', 'France', 'Netherlands', 'Denmark'], // Selected
+    languages: ['German'],
+    latitude: 52.5163,
+    longitude: 13.3777,
   },
   {
     id: 12,
     landmark: 'Sagrada Familia',
     country: 'Spain',
+    countryCode: 'ES',
     imageUrl: 'https://images.pexels.com/photos/819764/pexels-photo-819764.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'A large unfinished Roman Catholic minor basilica in Barcelona, designed by Antoni Gaudí.'
+    continent: 'Europe',
+    neighbors: ['France', 'Portugal', 'Andorra'],
+    languages: ['Spanish', 'Catalan'],
+    latitude: 41.4036,
+    longitude: 2.1744,
   },
   {
     id: 13,
     landmark: 'CN Tower',
     country: 'Canada',
+    countryCode: 'CA',
     imageUrl: 'https://images.pexels.com/photos/21389/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A 553.3 m-high concrete observation tower in Downtown Toronto.'
+    continent: 'North America',
+    neighbors: ['United States of America'],
+    languages: ['English', 'French'],
+    latitude: 43.6426,
+    longitude: -79.3871,
   },
   {
     id: 14,
     landmark: 'Chichen Itza',
     country: 'Mexico',
+    countryCode: 'MX',
     imageUrl: 'https://images.pexels.com/photos/3591074/pexels-photo-3591074.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A large pre-Columbian city built by the Maya people in the Yucatán Peninsula.'
+    continent: 'North America',
+    neighbors: ['United States of America', 'Guatemala', 'Belize'],
+    languages: ['Spanish'],
+    latitude: 20.6843,
+    longitude: -88.5678,
   },
   {
     id: 15,
     landmark: 'Fushimi Inari Shrine',
     country: 'Japan',
-    imageUrl: 'https://images.pexels.com/photos/19474885/pexels-photo-19474885/free-photo-of-gyeongbokgung-palace-in-seoul.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'An important Shinto shrine in southern Kyoto, famous for its thousands of red torii gates.'
+    countryCode: 'JP',
+    imageUrl: 'https://images.pexels.com/photos/19474885/pexels-photo-19474885/free-photo-of-gyeongbokgung-palace-in-seoul.jpeg?auto=compress&cs=tinysrgb&w=600', // Original: Gyeongbokgung Palace. You might want a Fushimi Inari image.
+    continent: 'Asia',
+    neighbors: [], // Island nation
+    languages: ['Japanese'],
+    latitude: 34.9671,
+    longitude: 135.7727,
   },
    {
     id: 16,
     landmark: 'Gyeongbokgung Palace',
     country: 'South Korea',
+    countryCode: 'KR',
     imageUrl: 'https://images.pexels.com/photos/2081345/pexels-photo-2081345.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'The main royal palace of the Joseon dynasty, located in Seoul.'
+    continent: 'Asia',
+    neighbors: ['North Korea'],
+    languages: ['Korean'],
+    latitude: 37.5796,
+    longitude: 126.9770,
   },
    {
     id: 17,
     landmark: 'Wat Arun',
     country: 'Thailand',
+    countryCode: 'TH',
     imageUrl: 'https://images.pexels.com/photos/11104877/pexels-photo-11104877.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A Buddhist temple (wat) in Bangkok Yai district of Bangkok, on the Thonburi west bank of the Chao Phraya River.'
+    continent: 'Asia',
+    neighbors: ['Myanmar', 'Laos', 'Cambodia', 'Malaysia'],
+    languages: ['Thai'],
+    latitude: 13.7438,
+    longitude: 100.4887,
   },
    {
     id: 18,
     landmark: 'Hagia Sophia',
     country: 'Turkey',
-    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A former architectural tour de force located in Istanbul.'
+    countryCode: 'TR',
+    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=600', // Original: Generic interior. You might want an exterior Hagia Sophia image.
+    continent: 'Asia', // Straddles Europe and Asia
+    neighbors: ['Greece', 'Bulgaria', 'Georgia', 'Armenia', 'Iran', 'Iraq', 'Syria'], // Azerbaijan (Nakhchivan) omitted for brevity
+    languages: ['Turkish'],
+    latitude: 41.0086,
+    longitude: 28.9800,
   },
    {
     id: 19,
     landmark: 'Acropolis of Athens',
     country: 'Greece',
+    countryCode: 'GR',
     imageUrl: 'https://images.pexels.com/photos/14557270/pexels-photo-14557270.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'An ancient citadel located on a rocky outcrop above the city of Athens.'
+    continent: 'Europe',
+    neighbors: ['Albania', 'North Macedonia', 'Bulgaria', 'Turkey'],
+    languages: ['Greek'],
+    latitude: 37.9715,
+    longitude: 23.7257,
   },
    {
     id: 20,
     landmark: 'Kinderdijk Windmills',
     country: 'Netherlands',
+    countryCode: 'NL',
     imageUrl: 'https://images.pexels.com/photos/313746/pexels-photo-313746.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A UNESCO World Heritage site featuring a network of windmills near Rotterdam.'
+    continent: 'Europe',
+    neighbors: ['Germany', 'Belgium'],
+    languages: ['Dutch'],
+    latitude: 51.8825,
+    longitude: 4.6333,
   },
    {
     id: 21,
     landmark: 'Matterhorn',
-    country: 'Switzerland',
+    country: 'Switzerland', // Straddles SWI/ITA border, but listed as Switzerland in gameData
+    countryCode: 'CH',
     imageUrl: 'https://images.pexels.com/photos/267104/pexels-photo-267104.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A mountain of the Alps, straddling the border between Switzerland and Italy.'
+    continent: 'Europe',
+    neighbors: ['France', 'Germany', 'Italy', 'Austria', 'Liechtenstein'],
+    languages: ['German', 'French', 'Italian', 'Romansh'],
+    latitude: 45.9766, // Peak coordinates
+    longitude: 7.6585,
   },
    {
     id: 22,
     landmark: 'Milford Sound',
     country: 'New Zealand',
+    countryCode: 'NZ',
     imageUrl: 'https://images.pexels.com/photos/4444290/pexels-photo-4444290.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A fjord in the southwest of New Zealand\'s South Island.'
+    continent: 'Oceania',
+    neighbors: [], // Island nation
+    languages: ['English', 'Māori'],
+    latitude: -44.6718, // Approx. location of the sound/visitor area
+    longitude: 167.9259,
   },
    {
     id: 23,
     landmark: 'Table Mountain',
     country: 'South Africa',
+    countryCode: 'ZA',
     imageUrl: 'https://images.pexels.com/photos/259447/pexels-photo-259447.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A flat-topped mountain overlooking the city of Cape Town.'
+    continent: 'Africa',
+    neighbors: ['Namibia', 'Botswana', 'Zimbabwe', 'Mozambique', 'Eswatini', 'Lesotho'],
+    languages: ['Afrikaans', 'English', 'Zulu', 'Xhosa'], // Many official
+    latitude: -33.9625, // Upper cable station area
+    longitude: 18.4097,
   },
    {
     id: 24,
-    landmark: 'Maasai Mara',
-    country: 'Kenya', // Or Tanzania, as the migration crosses borders
+    landmark: 'Maasai Mara', // National Reserve in Kenya
+    country: 'Kenya',
+    countryCode: 'KE',
     imageUrl: 'https://images.pexels.com/photos/12334810/pexels-photo-12334810.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A large national game reserve in Narok County, Kenya, famous for the Great Migration.'
+    continent: 'Africa',
+    neighbors: ['Tanzania', 'Uganda', 'South Sudan', 'Ethiopia', 'Somalia'],
+    languages: ['Swahili', 'English'],
+    latitude: -1.4950, // Approx. central point of the reserve
+    longitude: 35.0000,
   },
    {
     id: 25,
     landmark: 'Perito Moreno Glacier',
     country: 'Argentina',
+    countryCode: 'AR',
     imageUrl: 'https://images.pexels.com/photos/4346849/pexels-photo-4346849.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A glacier located in the Los Glaciares National Park in southwest Santa Cruz Province, Argentina.'
+    continent: 'South America',
+    neighbors: ['Bolivia', 'Brazil', 'Chile', 'Paraguay', 'Uruguay'],
+    languages: ['Spanish'],
+    latitude: -50.4761, // Viewing area for the glacier
+    longitude: -73.0517,
   },
    {
     id: 26,
     landmark: 'Moai (Easter Island)',
-    country: 'Chile',
+    country: 'Chile', // Easter Island is a special territory of Chile
+    countryCode: 'CL',
     imageUrl: 'https://images.pexels.com/photos/14596489/pexels-photo-14596489.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'Monolithic human figures carved by the Rapa Nui people on a Polynesian island.'
+    continent: 'South America', // Chile is in SA, though Easter Island is in Oceania
+    neighbors: ['Argentina', 'Bolivia', 'Peru'],
+    languages: ['Spanish'],
+    latitude: -27.1258, // Ahu Tongariki as a prominent example
+    longitude: -109.2769,
   },
    {
     id: 27,
     landmark: 'St. Basil\'s Cathedral',
     country: 'Russia',
+    countryCode: 'RU',
     imageUrl: 'https://images.pexels.com/photos/8285167/pexels-photo-8285167.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hint: 'A church in Red Square in Moscow, known for its colorful onion domes.'
+    continent: 'Europe', // Moscow is in Europe
+    neighbors: ['Norway', 'Finland', 'Estonia', 'Latvia', 'Lithuania', 'Poland', 'Belarus', 'Ukraine', 'Georgia', 'Azerbaijan', 'Kazakhstan', 'China', 'Mongolia', 'North Korea'], // Very many; selected a few for hints.
+    languages: ['Russian'],
+    latitude: 55.7525,
+    longitude: 37.6231,
   },
    {
     id: 28,
     landmark: 'Geirangerfjord',
     country: 'Norway',
+    countryCode: 'NO',
     imageUrl: 'https://images.pexels.com/photos/6272372/pexels-photo-6272372.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A UNESCO World Heritage site and one of Norway\'s most visited tourist sites.'
+    continent: 'Europe',
+    neighbors: ['Sweden', 'Finland', 'Russia'],
+    languages: ['Norwegian'],
+    latitude: 62.1015, // Geiranger village as a reference point
+    longitude: 7.2046,
   },
    {
     id: 29,
     landmark: 'Blue Lagoon',
     country: 'Iceland',
+    countryCode: 'IS',
     imageUrl: 'https://images.pexels.com/photos/2253821/pexels-photo-2253821.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A geothermal spa located in a lava field near Grindavík on the Reykjanes Peninsula.'
+    continent: 'Europe',
+    neighbors: [], // Island nation
+    languages: ['Icelandic'],
+    latitude: 63.8804,
+    longitude: -22.4496,
   },
    {
     id: 30,
     landmark: 'Cliffs of Moher',
     country: 'Ireland',
+    countryCode: 'IE',
     imageUrl: 'https://images.pexels.com/photos/2382681/pexels-photo-2382681.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hint: 'Sea cliffs located at the southwestern edge of the Burren region in County Clare.'
+    continent: 'Europe',
+    neighbors: ['United Kingdom (Northern Ireland)'], // Land border
+    languages: ['Irish', 'English'],
+    latitude: 52.9719,
+    longitude: -9.4265,
   },
    {
     id: 31,
     landmark: 'Belém Tower',
     country: 'Portugal',
+    countryCode: 'PT',
     imageUrl: 'https://images.pexels.com/photos/461936/pexels-photo-461936.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hint: 'A 16th-century fortification in Lisbon, a UNESCO World Heritage site.'
+    continent: 'Europe',
+    neighbors: ['Spain'],
+    languages: ['Portuguese'],
+    latitude: 38.6916,
+    longitude: -9.2160,
   },
    {
     id: 32,
     landmark: 'Wawel Castle',
     country: 'Poland',
-    imageUrl: 'https://images.pexels.com/photos/27034310/pexels-photo-27034310/free-photo-of-tower-of-traditional-castle.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A castle residency in Kraków that served as the seat of Polish kings.'
+    countryCode: 'PL',
+    imageUrl: 'https://images.pexels.com/photos/27034310/pexels-photo-27034310/free-photo-of-tower-of-traditional-castle.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', // Original: Generic tower. You might want a Wawel Castle image.
+    continent: 'Europe',
+    neighbors: ['Germany', 'Czech Republic', 'Slovakia', 'Ukraine', 'Belarus', 'Lithuania', 'Russia (Kaliningrad)'],
+    languages: ['Polish'],
+    latitude: 50.0542,
+    longitude: 19.9356,
   },
    {
     id: 33,
     landmark: 'Vasa Museum',
     country: 'Sweden',
-    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A maritime museum in Stockholm that houses the almost fully intact 17th-century ship Vasa.'
+    countryCode: 'SE',
+    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', // Original: Same as Hagia Sophia. You might want a Vasa Museum image.
+    continent: 'Europe',
+    neighbors: ['Norway', 'Finland'],
+    languages: ['Swedish'],
+    latitude: 59.3280,
+    longitude: 18.0917,
   },
    {
     id: 34,
     landmark: 'Schönbrunn Palace',
     country: 'Austria',
+    countryCode: 'AT',
     imageUrl: 'https://images.pexels.com/photos/389865/pexels-photo-389865.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A former imperial summer residence in Vienna.'
+    continent: 'Europe',
+    neighbors: ['Germany', 'Czech Republic', 'Slovakia', 'Hungary', 'Slovenia', 'Italy', 'Switzerland', 'Liechtenstein'],
+    languages: ['German'],
+    latitude: 48.1849,
+    longitude: 16.3118,
   },
    {
     id: 35,
     landmark: 'Borobudur Temple',
     country: 'Indonesia',
+    countryCode: 'ID',
     imageUrl: 'https://images.pexels.com/photos/8775531/pexels-photo-8775531.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A 9th-century Mahayana Buddhist temple in Central Java.'
+    continent: 'Asia',
+    neighbors: ['Malaysia (on Borneo)', 'Papua New Guinea', 'Timor-Leste'],
+    languages: ['Indonesian'],
+    latitude: -7.6079,
+    longitude: 110.2038,
   },
 ];

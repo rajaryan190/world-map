@@ -1,33 +1,31 @@
 import React from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, HelpCircle } from 'lucide-react';
 
 interface ScoreBoardProps {
   score: number;
-  totalQuestions: number; // Total questions in the *current* level
-  currentQuestion: number; // Current question number *within* the current level
-  level: number; // The current level number (e.g., 1, 2, 3)
+  totalQuestions: number;
+  currentQuestion: number;
+  level: number;
+  availableHints: number;
 }
 
-// Define styles as JavaScript objects (keeping the previous inline styles)
+// Re-creating Tailwind styles with JS objects (as per original file)
+// Consider migrating to Tailwind classes directly in JSX for better maintainability
 const containerStyle: React.CSSProperties = {
-    backgroundColor: '#1d4ed8', // Corresponds to Tailwind's blue-700
-    color: '#fff', // text-white
-    padding: '1rem', // p-4 (16px)
-    borderRadius: '0.5rem', // rounded-lg (8px)
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Simplified shadow-md
-    width: '100%', // Take full width of its grid column
-    boxSizing: 'border-box', // Include padding in width
-    display: 'flex', // Ensure flex layout for inner content
-    flexDirection: 'column', // Stack content vertically if needed, though justify-between makes it horizontal
-    justifyContent: 'space-between', // Title/Level on left, numbers on right
-    alignItems: 'center', // Center vertically
+    backgroundColor: '#1d4ed8', // blue-700
+    color: '#fff',
+    padding: '1rem', // p-4
+    borderRadius: '0.5rem', // rounded-lg
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)', // shadow-md
+    width: '100%',
+    boxSizing: 'border-box',
 };
 
 const flexRowBetweenCenter: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%', // Ensure inner flex takes full width
+    width: '100%',
 };
 
 const flexCenter: React.CSSProperties = {
@@ -36,15 +34,14 @@ const flexCenter: React.CSSProperties = {
 };
 
 const globeIconStyle: React.CSSProperties = {
-    marginRight: '0.75rem', // mr-3 (12px)
-    opacity: 0.9, // opacity-90
+    marginRight: '0.75rem', // mr-3
+    opacity: 0.9,
 };
 
-// Style for the main title and level container on the left
 const titleAndLevelStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center', // Vertically center text if heights differ
+    justifyContent: 'center',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -54,17 +51,16 @@ const titleStyle: React.CSSProperties = {
 
 const levelStyle: React.CSSProperties = {
     fontSize: '0.875rem', // text-sm
-    fontWeight: '500',
+    fontWeight: '500', // font-medium
     opacity: 0.9,
-    marginTop: '0.25rem', // Small gap between title and level
+    marginTop: '0.25rem',
 };
-
 
 const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '1.5rem', // space-x-6 (24px) - using gap for spacing in flex container
-    color: 'rgba(255, 255, 255, 0.9)', // text-white/90
+    gap: '1rem', // Reduced gap for more items space-x-4
+    color: 'rgba(255, 255, 255, 0.9)',
 };
 
 const textCenterStyle: React.CSSProperties = {
@@ -72,15 +68,21 @@ const textCenterStyle: React.CSSProperties = {
 };
 
 const labelStyle: React.CSSProperties = {
-    fontSize: '0.875rem', // text-sm (14px)
+    fontSize: '0.75rem', // text-xs for smaller labels
     textTransform: 'uppercase',
-    fontWeight: '500', // font-medium
-    opacity: 0.8, // opacity-80
+    fontWeight: '500',
+    opacity: 0.8,
+    display: 'block', // Ensure it's block for centering
 };
 
 const valueStyle: React.CSSProperties = {
-    fontSize: '1.25rem', // text-xl (20px)
+    fontSize: '1.125rem', // text-lg
     fontWeight: 'bold',
+};
+
+const hintIconStyle: React.CSSProperties = {
+    opacity: 0.8,
+    marginRight: '0.25rem', // mr-1
 };
 
 
@@ -88,34 +90,35 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
   score,
   totalQuestions,
   currentQuestion,
-  level
+  level,
+  availableHints
 }) => {
   return (
     <div style={containerStyle}>
-      {/* Inner flex container for main layout */}
       <div style={flexRowBetweenCenter}>
-        {/* Left side: Icon, Title, and Level */}
         <div style={flexCenter}>
            <Globe size={28} style={globeIconStyle} />
            <div style={titleAndLevelStyle}>
              <h1 style={titleStyle}>Country Landmark Challenge</h1>
-             <p style={levelStyle}>Level {level}</p> {/* Display current level */}
+             <p style={levelStyle}>Level {level}</p>
            </div>
         </div>
 
-        {/* Right side: Question and Score */}
         <div style={rightSectionStyle}>
-          {/* Question Display (within current level) */}
           <div style={textCenterStyle}>
             <p style={labelStyle}>Question</p>
-            {/* Display current question number within the level */}
             <p style={valueStyle}>{currentQuestion} / {totalQuestions}</p>
           </div>
-
-          {/* Score Display (total score) */}
           <div style={textCenterStyle}>
             <p style={labelStyle}>Score</p>
             <p style={valueStyle}>{score}</p>
+          </div>
+          {/* Hints Display */}
+          <div style={textCenterStyle}>
+             <p style={labelStyle}>
+                Hints
+            </p>
+            <p style={valueStyle}>{availableHints}</p>
           </div>
         </div>
       </div>

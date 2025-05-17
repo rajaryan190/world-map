@@ -117,46 +117,6 @@ export default tseslint.config(
 </html>
 </file>
 
-<file path="package.json">
-{
-  "name": "vite-react-typescript-starter",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "d3-geo": "^3.1.0",
-    "lucide-react": "^0.344.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "topojson-client": "^3.1.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.9.1",
-    "@types/d3-geo": "^3.1.0",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
-    "@types/topojson-client": "^3.1.4",
-    "@vitejs/plugin-react": "^4.3.1",
-    "autoprefixer": "^10.4.18",
-    "eslint": "^9.9.1",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.11",
-    "globals": "^15.9.0",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
-  }
-}
-</file>
-
 <file path="postcss.config.js">
 export default {
   plugins: {
@@ -182,69 +142,95 @@ export default App;
 </file>
 
 <file path="src/components/Game.tsx">
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Map } from './Map';
 import { Landmark } from './Landmark';
 import { ScoreBoard } from './ScoreBoard';
-import { gameData as allGameData } from '../data/gameData'; // Renamed to avoid confusion
+import { gameData as allGameData } from '../data/gameData';
 import { shuffle } from '../utils/helpers';
-import { Trophy } from 'lucide-react';
+import { LandmarkData } from '../types'; // Ensure LandmarkData is imported
+import { Trophy, HelpCircle } from 'lucide-react';
 
 // Define level configuration: number of questions per level
 const LEVEL_CONFIG = [
   { count: 10, name: 'Level 1' },
-  { count: 25, name: 'Level 2' }, // Note: Requires total of 10 + 25 = 35 questions
-  { count: 40, name: 'Level 3' }, // Note: Requires total of 35 + 40 = 75 questions
-  // Add more levels as needed, with higher counts
+  { count: 25, name: 'Level 2' },
+  { count: 40, name: 'Level 3' },
 ];
 
-// Calculate cumulative question counts for easier level progression tracking
 const cumulativeQuestions = LEVEL_CONFIG.reduce((acc, level, index) => {
     const previousTotal = index > 0 ? acc[index - 1] : 0;
     acc.push(previousTotal + level.count);
     return acc;
 }, [] as number[]);
 
+// Define Hint Types
+export type HintCategory = 'flag' | 'continent' | 'neighbors' | 'language';
+export interface ActiveHint {
+  category: HintCategory;
+  text: string;
+  imageUrl?: string; // For flag
+}
+
+const INITIAL_HINTS_PER_LEVEL = 5;
+
 export const Game: React.FC = () => {
-  // Use state to hold the shuffled list of ALL available game data
-  const [shuffledGameData, setShuffledGameData] = useState(shuffle([...allGameData]));
-  // State to track the index of the current question in the shuffled list
+  const [shuffledGameData, setShuffledGameData] = useState<LandmarkData[]>(() => shuffle([...allGameData]));
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  // State to track the current level
   const [currentLevel, setCurrentLevel] = useState(0);
-  // State to track the player's total score
   const [score, setScore] = useState(0);
-  // State to track countries correctly identified
   const [revealedCountries, setRevealedCountries] = useState<string[]>([]);
-  // State for feedback messages
   const [feedback, setFeedback] = useState<{ status: 'correct' | 'incorrect' | null, message: string }>({
     status: null,
     message: ''
   });
-  // State to track if the game is over
   const [gameOver, setGameOver] = useState(false);
-  // State to potentially show level complete message
   const [levelComplete, setLevelComplete] = useState(false);
 
+  // New Hint States
+  const [availableHints, setAvailableHints] = useState(INITIAL_HINTS_PER_LEVEL);
+  const [activeHint, setActiveHint] = useState<ActiveHint | null>(null);
+  const [shownHintsForCurrentQuestion, setShownHintsForCurrentQuestion] = useState<HintCategory[]>([]);
 
-  // Calculate details for the current level
   const questionsAnsweredBeforeThisLevel = currentLevel > 0 ? cumulativeQuestions[currentLevel - 1] : 0;
   const totalQuestionsInCurrentLevel = LEVEL_CONFIG[currentLevel].count;
-  // Index in the shuffled list where the current level ends
   const currentLevelEndIndex = cumulativeQuestions[currentLevel] - 1;
-  // The current question number within the current level (1-based index)
   const currentQuestionNumberInLevel = (currentQuestionIndex - questionsAnsweredBeforeThisLevel) + 1;
 
-  // Get the current landmark data based on the global question index
   const currentLandmark = shuffledGameData[currentQuestionIndex];
 
-  // Check if there are enough questions in gameData for the next potential level
   const canAdvanceToNextLevel = (currentLevel + 1) < LEVEL_CONFIG.length &&
                                 allGameData.length >= cumulativeQuestions[currentLevel + 1];
 
+  const advanceQuestionOrLevel = useCallback((isEndOfLevel: boolean) => {
+    setActiveHint(null);
+    setShownHintsForCurrentQuestion([]);
+
+    if (isEndOfLevel) {
+      if (canAdvanceToNextLevel) {
+        setLevelComplete(true);
+        setAvailableHints(prev => prev + INITIAL_HINTS_PER_LEVEL);
+        setCurrentLevel(prevLevel => prevLevel + 1);
+        setTimeout(() => {
+          setLevelComplete(false);
+          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+        }, 2000);
+      } else {
+        setGameOver(true);
+      }
+    } else {
+      if (currentQuestionIndex + 1 < shuffledGameData.length) {
+        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      } else {
+        // No more questions in the entire dataset, even if not end of a configured level
+        setGameOver(true);
+      }
+    }
+  }, [canAdvanceToNextLevel, currentQuestionIndex, shuffledGameData.length]);
+
+
   const handleCountryClick = (country: string) => {
-    // Prevent interaction if game is over, country already revealed, or feedback is showing
-    if (gameOver || revealedCountries.includes(country) || feedback.status !== null || levelComplete) {
+    if (gameOver || revealedCountries.includes(country) || feedback.status !== null || levelComplete || !currentLandmark) {
       return;
     }
 
@@ -256,49 +242,76 @@ export const Game: React.FC = () => {
         message: `Correct! ${currentLandmark.landmark} is in ${country}.`
       });
 
-      // Determine if this was the last question of the current level
       const isEndOfCurrentLevel = currentQuestionIndex === currentLevelEndIndex;
-
-      // Wait for feedback duration before proceeding
-      setTimeout(() => {
-        setFeedback({ status: null, message: '' }); // Clear feedback
-
-        if (isEndOfCurrentLevel) {
-          // Completed the current level
-          if (canAdvanceToNextLevel) {
-            // Enough data and config for the next level
-            setLevelComplete(true); // Show level complete message briefly
-            setCurrentLevel(prevLevel => prevLevel + 1); // Advance level
-            // currentQuestionIndex will be incremented below, moving to the start of the next level
-
-            // Hide level complete message after a delay
-            setTimeout(() => {
-              setLevelComplete(false);
-              setCurrentQuestionIndex(prevIndex => prevIndex + 1); // Move to the first question of the next level
-            }, 2000); // Show level complete for 2 seconds
-
-          } else {
-            // No more levels or not enough data for the next level - Game Over
-            setGameOver(true);
-          }
-        } else {
-          // Not the end of the level, just move to the next question
-          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        }
-      }, 1500); // Duration to show correct feedback
-
-    } else {
-      // Incorrect guess
-      setFeedback({
-        status: 'incorrect',
-        message: `Incorrect. Try again!` // Or maybe reveal the correct country here?
-      });
-
-      // Wait for feedback duration before clearing feedback
       setTimeout(() => {
         setFeedback({ status: null, message: '' });
-      }, 1500); // Duration to show incorrect feedback
+        advanceQuestionOrLevel(isEndOfCurrentLevel);
+      }, 1500);
+    } else {
+      setFeedback({
+        status: 'incorrect',
+        message: `Incorrect. Try again!`
+      });
+      setTimeout(() => {
+        setFeedback({ status: null, message: '' });
+      }, 1500);
     }
+  };
+
+  const handleHintRequest = () => {
+    if (availableHints <= 0 || !currentLandmark || activeHint) {
+        return;
+    }
+
+    const possibleHints: HintCategory[] = [];
+    if (currentLandmark.countryCode && !shownHintsForCurrentQuestion.includes('flag')) possibleHints.push('flag');
+    if (currentLandmark.continent && !shownHintsForCurrentQuestion.includes('continent')) possibleHints.push('continent');
+    if (currentLandmark.neighbors && currentLandmark.neighbors.length > 0 && !shownHintsForCurrentQuestion.includes('neighbors')) possibleHints.push('neighbors');
+    if (currentLandmark.languages && currentLandmark.languages.length > 0 && !shownHintsForCurrentQuestion.includes('language')) possibleHints.push('language');
+
+    if (possibleHints.length === 0) {
+        // Optionally inform user: No more new hint types for this landmark.
+        // For now, if the button is active but this occurs, it means all known hint types for this landmark were shown.
+        // The button's disabled state should ideally catch this earlier.
+        console.log("No new hint types available for this landmark (or data missing).");
+        return;
+    }
+
+    const selectedCategory = possibleHints[Math.floor(Math.random() * possibleHints.length)];
+    let hintText = '';
+    let hintImageUrl: string | undefined = undefined;
+
+    switch (selectedCategory) {
+        case 'flag':
+            hintText = `This is the flag of the country.`;
+            hintImageUrl = `https://flagsapi.com/${currentLandmark.countryCode}/flat/64.png`;
+            break;
+        case 'continent':
+            hintText = `This landmark is in a country on the continent of ${currentLandmark.continent}.`;
+            break;
+        case 'neighbors':
+            const neighbors = currentLandmark.neighbors || [];
+            if (neighbors.length > 0) {
+                const neighborsToShow = neighbors.slice(0, 2).join(', ');
+                hintText = `This country borders ${neighborsToShow}${neighbors.length > 2 ? ' and others' : ''}.`;
+            } else {
+                hintText = `This country is an island nation or has no direct land neighbors listed.`;
+            }
+            break;
+        case 'language':
+            const languages = currentLandmark.languages || [];
+            if (languages.length > 0) {
+                const languagesToShow = languages.join(', ');
+                hintText = `A primary language spoken here is ${languagesToShow}.`;
+            } else {
+                 hintText = `Language information is not available for this hint.`;
+            }
+            break;
+    }
+
+    setActiveHint({ category: selectedCategory, text: hintText, imageUrl: hintImageUrl });
+    setAvailableHints(prev => prev - 1);
+    setShownHintsForCurrentQuestion(prev => [...prev, selectedCategory]);
   };
 
   const restartGame = () => {
@@ -310,16 +323,20 @@ export const Game: React.FC = () => {
     setFeedback({ status: null, message: '' });
     setGameOver(false);
     setLevelComplete(false);
+    setAvailableHints(INITIAL_HINTS_PER_LEVEL);
+    setActiveHint(null);
+    setShownHintsForCurrentQuestion([]);
   };
 
-  // --- Render Logic ---
+  useEffect(() => { // Handle case where all questions are answered
+    if (currentQuestionIndex >= shuffledGameData.length && !gameOver && !levelComplete) {
+        setGameOver(true);
+    }
+  }, [currentQuestionIndex, shuffledGameData.length, gameOver, levelComplete]);
 
-  // --- Game Over State ---
   if (gameOver) {
-    // Determine the highest level reached for the game over message
-    const completedLevelIndex = currentLevel; // If game over, it's after attempting this level
+    const completedLevelIndex = currentLevel;
     const completedLevelName = LEVEL_CONFIG[completedLevelIndex]?.name || `Level ${completedLevelIndex + 1}`;
-
     return (
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500 animate-fade-in">
         <div className="p-12 text-center bg-gradient-to-b from-blue-50 to-white">
@@ -328,10 +345,8 @@ export const Game: React.FC = () => {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Game Over!</h1>
           <p className="text-2xl text-gray-600 mb-8">
-             {/* Adjust message based on whether a level was completed */}
             You completed {completedLevelName} and scored <span className="font-bold text-blue-600">{score}</span> total points!
           </p>
-           {/* Add a message if more data is needed for higher levels */}
            {!canAdvanceToNextLevel && LEVEL_CONFIG.length > currentLevel + 1 && allGameData.length < cumulativeQuestions[currentLevel + 1] && (
                 <p className="text-lg text-gray-500 mb-8">Add more landmark data to unlock higher levels!</p>
            )}
@@ -346,7 +361,6 @@ export const Game: React.FC = () => {
     );
   }
 
-  // --- Level Complete Message (Temporary Overlay) ---
    if (levelComplete) {
        return (
             <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500 animate-fade-in">
@@ -358,39 +372,64 @@ export const Game: React.FC = () => {
        );
    }
 
+   if (!currentLandmark && !gameOver && !levelComplete) { // Handles loading or no more landmarks
+    return (
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-12 text-center">
+        <h1 className="text-3xl font-bold text-gray-700">Loading game or no more landmarks available...</h1>
+        <p className="mt-4 text-gray-600">If the game doesn't start, please check the data or refresh.</p>
+      </div>
+    );
+  }
 
-  // --- Main Game UI ---
+
   return (
     <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500 flex flex-col">
-
-      {/* Top section for the Map */}
       <div className="flex-grow relative w-full overflow-hidden rounded-t-2xl">
          <Map
           onCountryClick={handleCountryClick}
           revealedCountries={revealedCountries}
-          correctCountry={currentLandmark?.country} // Pass correct country
+          correctCountry={currentLandmark?.country || ''}
          />
       </div>
 
-      {/* Bottom section for Landmark and ScoreBoard */}
-      <div className="p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-         {/* Landmark Component - Only render if currentLandmark is available */}
+      <div className="p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-start"> {/* items-start for alignment */}
         {currentLandmark && (
              <Landmark
                 landmark={currentLandmark}
                 feedback={feedback}
+                activeHint={activeHint}
              />
         )}
 
-
-        {/* ScoreBoard Component */}
-        <ScoreBoard
-          score={score}
-          // Pass level-specific question numbers and total for the level
-          currentQuestion={currentQuestionNumberInLevel}
-          totalQuestions={totalQuestionsInCurrentLevel}
-          level={currentLevel + 1} // Pass 1-based level number
-        />
+        <div className="flex flex-col space-y-6">
+          <ScoreBoard
+            score={score}
+            currentQuestion={currentQuestionNumberInLevel}
+            totalQuestions={totalQuestionsInCurrentLevel}
+            level={currentLevel + 1}
+            availableHints={availableHints}
+          />
+          {currentLandmark && ( // Only show hint button if there's a current landmark
+            <button
+              onClick={handleHintRequest}
+              disabled={
+                availableHints <= 0 || 
+                !!activeHint || // Disable if a hint is already active
+                !currentLandmark ||
+                ( // Check if all possible hint types for this landmark are shown or data is missing
+                    (!currentLandmark.countryCode || shownHintsForCurrentQuestion.includes('flag')) &&
+                    (!currentLandmark.continent || shownHintsForCurrentQuestion.includes('continent')) &&
+                    ((!currentLandmark.neighbors || currentLandmark.neighbors.length === 0) || shownHintsForCurrentQuestion.includes('neighbors')) &&
+                    ((!currentLandmark.languages || currentLandmark.languages.length === 0) || shownHintsForCurrentQuestion.includes('language'))
+                )
+              }
+              className="w-full flex items-center justify-center px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 transition-colors duration-200 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
+            >
+              <HelpCircle size={20} className="mr-2" />
+              Get a Hint ({availableHints} left)
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -400,16 +439,27 @@ export const Game: React.FC = () => {
 <file path="src/components/Landmark.tsx">
 import React from 'react';
 import { LandmarkData } from '../types';
-import { MapPin } from 'lucide-react';
+import { ActiveHint } from './Game'; // Import ActiveHint type
+import { MapPin, Flag, Globe2, Languages, MapPinned as NeighborsIcon } from 'lucide-react';
 
 interface LandmarkProps {
   landmark: LandmarkData;
   feedback: { status: 'correct' | 'incorrect' | null, message: string };
+  activeHint: ActiveHint | null;
 }
 
-export const Landmark: React.FC<LandmarkProps> = ({ landmark, feedback }) => {
+const HintIconDisplay: React.FC<{ category: ActiveHint['category'] }> = ({ category }) => {
+    switch (category) {
+        case 'flag': return <Flag size={18} className="mr-2 text-blue-600 shrink-0" />;
+        case 'continent': return <Globe2 size={18} className="mr-2 text-green-600 shrink-0" />;
+        case 'neighbors': return <NeighborsIcon size={18} className="mr-2 text-purple-600 shrink-0" />;
+        case 'language': return <Languages size={18} className="mr-2 text-red-600 shrink-0" />;
+        default: return null;
+    }
+};
+
+export const Landmark: React.FC<LandmarkProps> = ({ landmark, feedback, activeHint }) => {
   let feedbackClasses = '';
-  
   if (feedback.status === 'correct') {
     feedbackClasses = 'bg-green-100 border-green-500 text-green-700';
   } else if (feedback.status === 'incorrect') {
@@ -421,7 +471,7 @@ export const Landmark: React.FC<LandmarkProps> = ({ landmark, feedback }) => {
       <div className="relative overflow-hidden rounded-lg h-[200px] md:h-[300px] bg-gray-100">
         <img
           src={landmark.imageUrl}
-          alt={`Landmark`}
+          alt={`Landmark: ${landmark.landmark}`}
           className="w-full h-full object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
@@ -432,14 +482,36 @@ export const Landmark: React.FC<LandmarkProps> = ({ landmark, feedback }) => {
         </div>
       </div>
       
-      <div className="mt-4">
+      <div className="mt-4 flex-grow flex flex-col"> {/* flex-grow and flex-col */}
         <h3 className="text-xl font-semibold text-gray-800 mb-2">Which country is this landmark in?</h3>
         
-        {feedback.message && (
-          <div className={`mt-4 p-3 border rounded-lg ${feedbackClasses} transition-all duration-300`}>
-            {feedback.message}
-          </div>
-        )}
+        <div className="flex-grow"> {/* This div will take up remaining space for hint/feedback */}
+            {activeHint && (
+              <div className="mt-3 p-3 border border-blue-400 bg-blue-50 rounded-lg transition-all duration-300 animate-fade-in">
+                <div className="flex items-start mb-1"> {/* items-start for multiline text */}
+                    <HintIconDisplay category={activeHint.category} />
+                    <strong className="text-blue-700">Hint: {activeHint.category.charAt(0).toUpperCase() + activeHint.category.slice(1)}</strong>
+                </div>
+                {activeHint.imageUrl && (
+                  <img 
+                    src={activeHint.imageUrl} 
+                    alt={`${activeHint.category} hint`} 
+                    className="my-2 h-12 border border-gray-300" 
+                    onError={(e) => (e.currentTarget.style.display = 'none')} // Hide if flag image fails
+                  />
+                )}
+                <p className="text-sm text-gray-700 pl-7"> {/* Indent text to align with title if icon present */}
+                  {activeHint.text}
+                </p>
+              </div>
+            )}
+
+            {feedback.message && !activeHint && (
+              <div className={`mt-4 p-3 border rounded-lg ${feedbackClasses} transition-all duration-300 animate-fade-in`}>
+                {feedback.message}
+              </div>
+            )}
+        </div>
       </div>
     </div>
   );
@@ -451,12 +523,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { geoMercator, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import { CountryFeature } from '../types';
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Search, X } from 'lucide-react'; // Added Search and X icons
 
 interface MapProps {
   onCountryClick: (country: string) => void;
   revealedCountries: string[];
-  correctCountry: string; // Keep this for potential future feedback on incorrect guesses
+  correctCountry: string;
 }
 
 const WORLD_TOPOJSON_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
@@ -471,6 +543,10 @@ export const Map: React.FC<MapProps> = ({
   const [scale, setScale] = useState(120);
   const svgRef = useRef<SVGSVGElement>(null);
 
+  // New state for search
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchedCountryFeature, setSearchedCountryFeature] = useState<CountryFeature | null>(null);
+
   useEffect(() => {
     fetch(WORLD_TOPOJSON_URL)
       .then(response => {
@@ -480,10 +556,9 @@ export const Map: React.FC<MapProps> = ({
         return response.json();
       })
       .then(topology => {
-        // The 'countries' object name depends on the topojson file. 110m has 'countries'.
         if (!topology.objects || !topology.objects.countries) {
            console.error("TopoJSON does not contain 'countries' object.");
-           setWorldData([]); // Set to empty to show map area but no countries
+           setWorldData([]);
            return;
         }
         const countries = feature(topology, topology.objects.countries);
@@ -491,127 +566,163 @@ export const Map: React.FC<MapProps> = ({
       })
       .catch(error => {
         console.error("Error loading world map data:", error);
-        setWorldData([]); // Handle error by showing empty map area
+        setWorldData([]);
       });
   }, []);
 
   const width = 800;
-  const height = 400; // Keep this intrinsic SVG aspect ratio
+  const height = 400;
 
-  const handleZoomIn = () => {
-    setScale(prev => Math.min(prev * 1.3, 800)); // Increased zoom factor and max scale
-  };
-
-  const handleZoomOut = () => {
-    setScale(prev => Math.max(prev / 1.3, 80)); // Adjusted zoom factor and min scale
-  };
-
+  const handleZoomIn = () => setScale(prev => Math.min(prev * 1.3, 800));
+  const handleZoomOut = () => setScale(prev => Math.max(prev / 1.3, 80));
   const handleReset = () => {
-    setScale(120); // Reset scale
+    setScale(120);
+    setSearchTerm(''); // Also reset search on map reset
+    setSearchedCountryFeature(null);
   };
 
-  // Use the full available width/height of the container for the projection
-  // Adjust translate slightly if needed for centering
   const projection = geoMercator()
     .scale(scale)
-    .translate([width / 2, height / 1.5]); // Adjusted vertical centering slightly
+    .translate([width / 2, height / 1.5]);
 
+  const pathGenerator = geoPath().projection(projection); // Renamed for clarity
 
-  const path = geoPath().projection(projection);
+  // Handle search input change
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value;
+    setSearchTerm(term);
 
-  // Add loading state visual
-  if (!worldData && worldData !== []) {
+    if (term.trim() === '') {
+      setSearchedCountryFeature(null);
+      return;
+    }
+
+    if (worldData) {
+      const found = worldData.find(
+        (country) => country.properties.name.toLowerCase().includes(term.toLowerCase())
+      );
+      setSearchedCountryFeature(found || null);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setSearchedCountryFeature(null);
+  };
+
+  // --- RENDER LOGIC ---
+
+  if (!worldData) {
      return (
-  
       <div className="relative w-full h-[400px] md:h-[500px] rounded-t-2xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-lg flex items-center justify-center text-gray-600">
          Loading map...
       </div>
      );
   }
 
-  // Add error state visual
-  if (worldData && worldData.length === 0) {
+  if (worldData.length === 0) {
      return (
-      // Use classes to match the desired container look
       <div className="relative w-full h-[400px] md:h-[500px] rounded-t-2xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-lg flex items-center justify-center text-red-600">
          Error loading map data.
       </div>
      );
   }
 
-
   return (
-    // Main Map container - ensure it takes up the required height and has rounded corners
-    // This div gets its rounded-t-2xl from the parent in Game.tsx
     <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-blue-50 to-white">
-      {/* Controls and Title */}
-      <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-center"> {/* Added z-10 to ensure controls are above map paths */}
-          <h2 className="text-xl font-semibold text-gray-800 drop-shadow">Click on the correct country</h2> {/* Added drop-shadow for readability */}
+      {/* Controls, Title, and Search Bar */}
+      <div className="absolute top-0 left-0 right-0 p-4 z-10 space-y-3">
+        <div className="flex justify-between items-start">
+          <h2 className="text-xl font-semibold text-gray-800 drop-shadow">
+            Click on the correct country
+          </h2>
           <div className="flex gap-2">
             <button
               onClick={handleZoomIn}
               className="p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
-              title="Zoom in"
-              aria-label="Zoom in" // Added for accessibility
+              title="Zoom in" aria-label="Zoom in"
             >
               <ZoomIn size={20} className="text-gray-600" />
             </button>
             <button
               onClick={handleZoomOut}
               className="p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
-              title="Zoom out"
-              aria-label="Zoom out" // Added for accessibility
+              title="Zoom out" aria-label="Zoom out"
             >
               <ZoomOut size={20} className="text-gray-600" />
             </button>
             <button
               onClick={handleReset}
               className="p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
-              title="Reset zoom"
-              aria-label="Reset zoom" // Added for accessibility
+              title="Reset view" aria-label="Reset view"
             >
               <Maximize2 size={20} className="text-gray-600" />
             </button>
           </div>
         </div>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search size={18} className="text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search for a country..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="w-full sm:w-auto md:max-w-xs p-2 pl-10 pr-8 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+            aria-label="Search for a country"
+          />
+          {searchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+              aria-label="Clear search"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* SVG Container */}
-      {/* This inner div holds the SVG and ensures it fits within the outer container */}
-      <div className="relative w-full h-full overflow-hidden">
+      <div className="relative w-full h-full overflow-hidden pt-28"> {/* Added padding-top to avoid overlap with controls */}
         <svg
           ref={svgRef}
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-full" // SVG itself should fill its container
+          className="w-full h-full"
         >
           {worldData.map((country, i) => {
-            const isRevealed = revealedCountries.includes(country.properties.name);
-            const isHovered = hoveredCountry === country.properties.name;
-            // Optional: Add a class for the correct country when feedback is 'incorrect'
-            // const isCorrectCountryOnIncorrectGuess = feedback.status === 'incorrect' && country.properties.name === correctCountry;
+            const countryName = country.properties.name;
+            const isRevealed = revealedCountries.includes(countryName);
+            const isHovered = hoveredCountry === countryName;
+            const isSearched = searchedCountryFeature?.properties.name === countryName;
 
-            let fill = '#e5e7eb'; // default gray
+            let fill = '#e5e7eb'; // Tailwind gray-200
             if (isRevealed) {
-                fill = '#22c55e'; // green for revealed
+              fill = '#22c55e'; // Tailwind green-500
+            } else if (isSearched) {
+              fill = '#f59e0b'; // Tailwind amber-500 (for searched country)
             } else if (isHovered) {
-                 fill = '#60a5fa'; // blue for hovered
+              fill = '#60a5fa'; // Tailwind blue-400
             }
-            // if (isCorrectCountryOnIncorrectGuess) {
-            //     fill = '#f97316'; // orange, for example
-            // }
-
 
             return (
               <path
-                key={i}
-                d={path(country) || ''}
-                fill={fill} // Use the calculated fill color
+                key={i} // Consider using a more stable ID if available from TopoJSON properties
+                d={pathGenerator(country) || ''}
+                fill={fill}
                 stroke="#fff"
                 strokeWidth="0.5"
                 className="transition-colors duration-200 cursor-pointer hover:opacity-80"
-                onClick={() => onCountryClick(country.properties.name)}
-                onMouseEnter={() => setHoveredCountry(country.properties.name)}
+                onClick={() => {
+                  onCountryClick(countryName);
+                  clearSearch(); // Clear search when a country is clicked for guessing
+                }}
+                onMouseEnter={() => setHoveredCountry(countryName)}
                 onMouseLeave={() => setHoveredCountry(null)}
-                aria-label={country.properties.name} // Added for accessibility
+                aria-label={countryName}
               />
             );
           })}
@@ -619,11 +730,20 @@ export const Map: React.FC<MapProps> = ({
       </div>
 
       {/* Hovered Country Tooltip */}
-      {hoveredCountry && !revealedCountries.includes(hoveredCountry) && ( // Only show if not revealed yet
-        <div className="absolute bottom-6 left-6 bg-black bg-opacity-75 text-white text-sm px-4 py-2 rounded-full shadow-lg backdrop-blur-sm z-20"> {/* Added z-20 to be above controls */}
+      {hoveredCountry && 
+       !revealedCountries.includes(hoveredCountry) &&
+       searchedCountryFeature?.properties.name !== hoveredCountry && // Don't show hover tooltip if it's the searched one (optional)
+        (
+        <div className="absolute bottom-6 left-6 bg-black bg-opacity-75 text-white text-sm px-4 py-2 rounded-full shadow-lg backdrop-blur-sm z-20">
           {hoveredCountry}
         </div>
       )}
+       {/* Searched Country Name (Optional display) */}
+       {searchedCountryFeature && (
+         <div className="absolute bottom-6 right-6 bg-amber-500 text-white text-sm px-4 py-2 rounded-full shadow-lg z-20">
+           Found: {searchedCountryFeature.properties.name}
+         </div>
+       )}
     </div>
   );
 };
@@ -631,35 +751,33 @@ export const Map: React.FC<MapProps> = ({
 
 <file path="src/components/ScoreBoard.tsx">
 import React from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, HelpCircle } from 'lucide-react';
 
 interface ScoreBoardProps {
   score: number;
-  totalQuestions: number; // Total questions in the *current* level
-  currentQuestion: number; // Current question number *within* the current level
-  level: number; // The current level number (e.g., 1, 2, 3)
+  totalQuestions: number;
+  currentQuestion: number;
+  level: number;
+  availableHints: number;
 }
 
-// Define styles as JavaScript objects (keeping the previous inline styles)
+// Re-creating Tailwind styles with JS objects (as per original file)
+// Consider migrating to Tailwind classes directly in JSX for better maintainability
 const containerStyle: React.CSSProperties = {
-    backgroundColor: '#1d4ed8', // Corresponds to Tailwind's blue-700
-    color: '#fff', // text-white
-    padding: '1rem', // p-4 (16px)
-    borderRadius: '0.5rem', // rounded-lg (8px)
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Simplified shadow-md
-    width: '100%', // Take full width of its grid column
-    boxSizing: 'border-box', // Include padding in width
-    display: 'flex', // Ensure flex layout for inner content
-    flexDirection: 'column', // Stack content vertically if needed, though justify-between makes it horizontal
-    justifyContent: 'space-between', // Title/Level on left, numbers on right
-    alignItems: 'center', // Center vertically
+    backgroundColor: '#1d4ed8', // blue-700
+    color: '#fff',
+    padding: '1rem', // p-4
+    borderRadius: '0.5rem', // rounded-lg
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)', // shadow-md
+    width: '100%',
+    boxSizing: 'border-box',
 };
 
 const flexRowBetweenCenter: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%', // Ensure inner flex takes full width
+    width: '100%',
 };
 
 const flexCenter: React.CSSProperties = {
@@ -668,15 +786,14 @@ const flexCenter: React.CSSProperties = {
 };
 
 const globeIconStyle: React.CSSProperties = {
-    marginRight: '0.75rem', // mr-3 (12px)
-    opacity: 0.9, // opacity-90
+    marginRight: '0.75rem', // mr-3
+    opacity: 0.9,
 };
 
-// Style for the main title and level container on the left
 const titleAndLevelStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center', // Vertically center text if heights differ
+    justifyContent: 'center',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -686,17 +803,16 @@ const titleStyle: React.CSSProperties = {
 
 const levelStyle: React.CSSProperties = {
     fontSize: '0.875rem', // text-sm
-    fontWeight: '500',
+    fontWeight: '500', // font-medium
     opacity: 0.9,
-    marginTop: '0.25rem', // Small gap between title and level
+    marginTop: '0.25rem',
 };
-
 
 const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '1.5rem', // space-x-6 (24px) - using gap for spacing in flex container
-    color: 'rgba(255, 255, 255, 0.9)', // text-white/90
+    gap: '1rem', // Reduced gap for more items space-x-4
+    color: 'rgba(255, 255, 255, 0.9)',
 };
 
 const textCenterStyle: React.CSSProperties = {
@@ -704,15 +820,21 @@ const textCenterStyle: React.CSSProperties = {
 };
 
 const labelStyle: React.CSSProperties = {
-    fontSize: '0.875rem', // text-sm (14px)
+    fontSize: '0.75rem', // text-xs for smaller labels
     textTransform: 'uppercase',
-    fontWeight: '500', // font-medium
-    opacity: 0.8, // opacity-80
+    fontWeight: '500',
+    opacity: 0.8,
+    display: 'block', // Ensure it's block for centering
 };
 
 const valueStyle: React.CSSProperties = {
-    fontSize: '1.25rem', // text-xl (20px)
+    fontSize: '1.125rem', // text-lg
     fontWeight: 'bold',
+};
+
+const hintIconStyle: React.CSSProperties = {
+    opacity: 0.8,
+    marginRight: '0.25rem', // mr-1
 };
 
 
@@ -720,34 +842,35 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
   score,
   totalQuestions,
   currentQuestion,
-  level
+  level,
+  availableHints
 }) => {
   return (
     <div style={containerStyle}>
-      {/* Inner flex container for main layout */}
       <div style={flexRowBetweenCenter}>
-        {/* Left side: Icon, Title, and Level */}
         <div style={flexCenter}>
            <Globe size={28} style={globeIconStyle} />
            <div style={titleAndLevelStyle}>
              <h1 style={titleStyle}>Country Landmark Challenge</h1>
-             <p style={levelStyle}>Level {level}</p> {/* Display current level */}
+             <p style={levelStyle}>Level {level}</p>
            </div>
         </div>
 
-        {/* Right side: Question and Score */}
         <div style={rightSectionStyle}>
-          {/* Question Display (within current level) */}
           <div style={textCenterStyle}>
             <p style={labelStyle}>Question</p>
-            {/* Display current question number within the level */}
             <p style={valueStyle}>{currentQuestion} / {totalQuestions}</p>
           </div>
-
-          {/* Score Display (total score) */}
           <div style={textCenterStyle}>
             <p style={labelStyle}>Score</p>
             <p style={valueStyle}>{score}</p>
+          </div>
+          {/* Hints Display */}
+          <div style={textCenterStyle}>
+             <p style={labelStyle}>
+                Hints
+            </p>
+            <p style={valueStyle}>{availableHints}</p>
           </div>
         </div>
       </div>
@@ -757,6 +880,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
 </file>
 
 <file path="src/data/gameData.ts">
+// src/data/gameData.ts
 import { LandmarkData } from '../types';
 
 export const gameData: LandmarkData[] = [
@@ -765,71 +889,101 @@ export const gameData: LandmarkData[] = [
     id: 1,
     landmark: 'Eiffel Tower',
     country: 'France',
+    countryCode: 'FR',
     imageUrl: 'https://images.pexels.com/photos/460740/pexels-photo-460740.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This iconic iron tower is located in the capital city of a European country known for its cuisine.'
+    continent: 'Europe',
+    neighbors: ['Germany', 'Spain', 'Italy', 'Switzerland', 'Belgium', 'Luxembourg'],
+    languages: ['French'],
   },
   {
     id: 2,
     landmark: 'Statue of Liberty',
     country: 'United States of America',
+    countryCode: 'US',
     imageUrl: 'https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This copper statue was a gift from France and stands on Liberty Island.'
+    continent: 'North America',
+    neighbors: ['Canada', 'Mexico'],
+    languages: ['English'],
   },
   {
     id: 3,
     landmark: 'Taj Mahal',
     country: 'India',
+    countryCode: 'IN',
     imageUrl: 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This white marble mausoleum was built by an emperor in memory of his wife.'
+    continent: 'Asia',
+    neighbors: ['Pakistan', 'China', 'Nepal', 'Bhutan', 'Bangladesh', 'Myanmar'],
+    languages: ['Hindi', 'English'],
   },
   {
     id: 4,
     landmark: 'Great Wall',
     country: 'China',
+    countryCode: 'CN',
     imageUrl: 'https://images.pexels.com/photos/2412603/pexels-photo-2412603.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This massive defensive structure spans thousands of miles across an Asian country.'
+    continent: 'Asia',
+    neighbors: ['Russia', 'Mongolia', 'North Korea', 'Vietnam', 'India'], // Selected few
+    languages: ['Mandarin Chinese'],
   },
   {
     id: 5,
     landmark: 'Colosseum',
     country: 'Italy',
+    countryCode: 'IT',
     imageUrl: 'https://images.pexels.com/photos/532263/pexels-photo-532263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This ancient amphitheater in a European capital was used for gladiatorial contests.'
+    continent: 'Europe',
+    neighbors: ['France', 'Switzerland', 'Austria', 'Slovenia'],
+    languages: ['Italian'],
   },
   {
     id: 6,
     landmark: 'Christ the Redeemer',
     country: 'Brazil',
+    countryCode: 'BR',
     imageUrl: 'https://images.pexels.com/photos/2818895/pexels-photo-2818895.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This art deco statue of Jesus Christ overlooks a South American city known for its carnival.'
+    continent: 'South America',
+    neighbors: ['Argentina', 'Bolivia', 'Colombia', 'Paraguay', 'Peru', 'Uruguay', 'Venezuela'], // Selected
+    languages: ['Portuguese'],
   },
   {
     id: 7,
     landmark: 'Machu Picchu',
     country: 'Peru',
+    countryCode: 'PE',
     imageUrl: 'https://images.pexels.com/photos/2929906/pexels-photo-2929906.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'This 15th-century Inca citadel is located in the Eastern Cordillera of southern South America.'
+    continent: 'South America',
+    neighbors: ['Ecuador', 'Colombia', 'Brazil', 'Bolivia', 'Chile'],
+    languages: ['Spanish', 'Quechua'],
   },
   {
     id: 8,
     landmark: 'Pyramids of Giza',
     country: 'Egypt',
+    countryCode: 'EG',
     imageUrl: 'https://images.pexels.com/photos/7566890/pexels-photo-7566890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'These ancient structures were built as tombs for pharaohs in a North African country.'
+    continent: 'Africa', // Straddles Africa and Asia (Sinai)
+    neighbors: ['Libya', 'Sudan', 'Israel'], // Gaza Strip omitted for simplicity as a hint
+    languages: ['Arabic'],
   },
   {
     id: 9,
     landmark: 'Sydney Opera House',
     country: 'Australia',
+    countryCode: 'AU',
     imageUrl: 'https://images.pexels.com/photos/1878293/pexels-photo-1878293.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This performing arts center features distinctive sail-shaped shells.'
+    continent: 'Oceania',
+    neighbors: [], // Island nation
+    languages: ['English'],
   },
   {
     id: 10,
     landmark: 'Big Ben',
     country: 'United Kingdom',
+    countryCode: 'GB',
     imageUrl: 'https://images.pexels.com/photos/77171/pexels-photo-77171.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'This famous clock tower is part of the Palace of Westminster in a European capital city.'
+    continent: 'Europe',
+    neighbors: ['Ireland'], // Land border
+    languages: ['English'],
   },
 
   // --- Level 2 Data (25 New Entries) ---
@@ -837,176 +991,251 @@ export const gameData: LandmarkData[] = [
     id: 11,
     landmark: 'Brandenburg Gate',
     country: 'Germany',
+    countryCode: 'DE',
     imageUrl: 'https://images.pexels.com/photos/2570063/pexels-photo-2570063.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'An 18th-century neoclassical monument in Berlin.'
+    continent: 'Europe',
+    neighbors: ['Poland', 'Czech Republic', 'Austria', 'Switzerland', 'France', 'Netherlands', 'Denmark'], // Selected
+    languages: ['German'],
   },
   {
     id: 12,
     landmark: 'Sagrada Familia',
     country: 'Spain',
+    countryCode: 'ES',
     imageUrl: 'https://images.pexels.com/photos/819764/pexels-photo-819764.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    hint: 'A large unfinished Roman Catholic minor basilica in Barcelona, designed by Antoni Gaudí.'
+    continent: 'Europe',
+    neighbors: ['France', 'Portugal', 'Andorra'],
+    languages: ['Spanish', 'Catalan'],
   },
   {
     id: 13,
     landmark: 'CN Tower',
     country: 'Canada',
+    countryCode: 'CA',
     imageUrl: 'https://images.pexels.com/photos/21389/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A 553.3 m-high concrete observation tower in Downtown Toronto.'
+    continent: 'North America',
+    neighbors: ['United States of America'],
+    languages: ['English', 'French'],
   },
   {
     id: 14,
     landmark: 'Chichen Itza',
     country: 'Mexico',
+    countryCode: 'MX',
     imageUrl: 'https://images.pexels.com/photos/3591074/pexels-photo-3591074.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A large pre-Columbian city built by the Maya people in the Yucatán Peninsula.'
+    continent: 'North America',
+    neighbors: ['United States of America', 'Guatemala', 'Belize'],
+    languages: ['Spanish'],
   },
   {
     id: 15,
     landmark: 'Fushimi Inari Shrine',
     country: 'Japan',
-    imageUrl: 'https://images.pexels.com/photos/19474885/pexels-photo-19474885/free-photo-of-gyeongbokgung-palace-in-seoul.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'An important Shinto shrine in southern Kyoto, famous for its thousands of red torii gates.'
+    countryCode: 'JP',
+    imageUrl: 'https://images.pexels.com/photos/19474885/pexels-photo-19474885/free-photo-of-gyeongbokgung-palace-in-seoul.jpeg?auto=compress&cs=tinysrgb&w=600', // Original: Gyeongbokgung Palace. You might want a Fushimi Inari image.
+    continent: 'Asia',
+    neighbors: [], // Island nation
+    languages: ['Japanese'],
   },
    {
     id: 16,
     landmark: 'Gyeongbokgung Palace',
     country: 'South Korea',
+    countryCode: 'KR',
     imageUrl: 'https://images.pexels.com/photos/2081345/pexels-photo-2081345.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'The main royal palace of the Joseon dynasty, located in Seoul.'
+    continent: 'Asia',
+    neighbors: ['North Korea'],
+    languages: ['Korean'],
   },
    {
     id: 17,
     landmark: 'Wat Arun',
     country: 'Thailand',
+    countryCode: 'TH',
     imageUrl: 'https://images.pexels.com/photos/11104877/pexels-photo-11104877.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A Buddhist temple (wat) in Bangkok Yai district of Bangkok, on the Thonburi west bank of the Chao Phraya River.'
+    continent: 'Asia',
+    neighbors: ['Myanmar', 'Laos', 'Cambodia', 'Malaysia'],
+    languages: ['Thai'],
   },
    {
     id: 18,
     landmark: 'Hagia Sophia',
     country: 'Turkey',
-    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A former architectural tour de force located in Istanbul.'
+    countryCode: 'TR',
+    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=600', // Original: Generic interior. You might want an exterior Hagia Sophia image.
+    continent: 'Asia', // Straddles Europe and Asia
+    neighbors: ['Greece', 'Bulgaria', 'Georgia', 'Armenia', 'Iran', 'Iraq', 'Syria'], // Azerbaijan (Nakhchivan) omitted for brevity
+    languages: ['Turkish'],
   },
    {
     id: 19,
     landmark: 'Acropolis of Athens',
     country: 'Greece',
+    countryCode: 'GR',
     imageUrl: 'https://images.pexels.com/photos/14557270/pexels-photo-14557270.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'An ancient citadel located on a rocky outcrop above the city of Athens.'
+    continent: 'Europe',
+    neighbors: ['Albania', 'North Macedonia', 'Bulgaria', 'Turkey'],
+    languages: ['Greek'],
   },
    {
     id: 20,
     landmark: 'Kinderdijk Windmills',
     country: 'Netherlands',
+    countryCode: 'NL',
     imageUrl: 'https://images.pexels.com/photos/313746/pexels-photo-313746.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A UNESCO World Heritage site featuring a network of windmills near Rotterdam.'
+    continent: 'Europe',
+    neighbors: ['Germany', 'Belgium'],
+    languages: ['Dutch'],
   },
    {
     id: 21,
     landmark: 'Matterhorn',
-    country: 'Switzerland',
+    country: 'Switzerland', // Straddles SWI/ITA border, but listed as Switzerland in gameData
+    countryCode: 'CH',
     imageUrl: 'https://images.pexels.com/photos/267104/pexels-photo-267104.jpeg?auto=compress&cs=tinysrgb&w=600',
-    hint: 'A mountain of the Alps, straddling the border between Switzerland and Italy.'
+    continent: 'Europe',
+    neighbors: ['France', 'Germany', 'Italy', 'Austria', 'Liechtenstein'],
+    languages: ['German', 'French', 'Italian', 'Romansh'],
   },
    {
     id: 22,
     landmark: 'Milford Sound',
     country: 'New Zealand',
+    countryCode: 'NZ',
     imageUrl: 'https://images.pexels.com/photos/4444290/pexels-photo-4444290.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A fjord in the southwest of New Zealand\'s South Island.'
+    continent: 'Oceania',
+    neighbors: [], // Island nation
+    languages: ['English', 'Māori'],
   },
    {
     id: 23,
     landmark: 'Table Mountain',
     country: 'South Africa',
+    countryCode: 'ZA',
     imageUrl: 'https://images.pexels.com/photos/259447/pexels-photo-259447.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A flat-topped mountain overlooking the city of Cape Town.'
+    continent: 'Africa',
+    neighbors: ['Namibia', 'Botswana', 'Zimbabwe', 'Mozambique', 'Eswatini', 'Lesotho'],
+    languages: ['Afrikaans', 'English', 'Zulu', 'Xhosa'], // Many official
   },
    {
     id: 24,
-    landmark: 'Maasai Mara',
-    country: 'Kenya', // Or Tanzania, as the migration crosses borders
+    landmark: 'Maasai Mara', // National Reserve in Kenya
+    country: 'Kenya',
+    countryCode: 'KE',
     imageUrl: 'https://images.pexels.com/photos/12334810/pexels-photo-12334810.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A large national game reserve in Narok County, Kenya, famous for the Great Migration.'
+    continent: 'Africa',
+    neighbors: ['Tanzania', 'Uganda', 'South Sudan', 'Ethiopia', 'Somalia'],
+    languages: ['Swahili', 'English'],
   },
    {
     id: 25,
     landmark: 'Perito Moreno Glacier',
     country: 'Argentina',
+    countryCode: 'AR',
     imageUrl: 'https://images.pexels.com/photos/4346849/pexels-photo-4346849.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A glacier located in the Los Glaciares National Park in southwest Santa Cruz Province, Argentina.'
+    continent: 'South America',
+    neighbors: ['Bolivia', 'Brazil', 'Chile', 'Paraguay', 'Uruguay'],
+    languages: ['Spanish'],
   },
    {
     id: 26,
     landmark: 'Moai (Easter Island)',
-    country: 'Chile',
+    country: 'Chile', // Easter Island is a special territory of Chile
+    countryCode: 'CL',
     imageUrl: 'https://images.pexels.com/photos/14596489/pexels-photo-14596489.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'Monolithic human figures carved by the Rapa Nui people on a Polynesian island.'
+    continent: 'South America', // Chile is in SA, though Easter Island is in Oceania
+    neighbors: ['Argentina', 'Bolivia', 'Peru'],
+    languages: ['Spanish'],
   },
    {
     id: 27,
     landmark: 'St. Basil\'s Cathedral',
     country: 'Russia',
+    countryCode: 'RU',
     imageUrl: 'https://images.pexels.com/photos/8285167/pexels-photo-8285167.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hint: 'A church in Red Square in Moscow, known for its colorful onion domes.'
+    continent: 'Europe', // Moscow is in Europe
+    neighbors: ['Norway', 'Finland', 'Estonia', 'Latvia', 'Lithuania', 'Poland', 'Belarus', 'Ukraine', 'Georgia', 'Azerbaijan', 'Kazakhstan', 'China', 'Mongolia', 'North Korea'], // Very many; selected a few for hints.
+    languages: ['Russian'],
   },
    {
     id: 28,
     landmark: 'Geirangerfjord',
     country: 'Norway',
+    countryCode: 'NO',
     imageUrl: 'https://images.pexels.com/photos/6272372/pexels-photo-6272372.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A UNESCO World Heritage site and one of Norway\'s most visited tourist sites.'
+    continent: 'Europe',
+    neighbors: ['Sweden', 'Finland', 'Russia'],
+    languages: ['Norwegian'],
   },
    {
     id: 29,
     landmark: 'Blue Lagoon',
     country: 'Iceland',
+    countryCode: 'IS',
     imageUrl: 'https://images.pexels.com/photos/2253821/pexels-photo-2253821.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A geothermal spa located in a lava field near Grindavík on the Reykjanes Peninsula.'
+    continent: 'Europe',
+    neighbors: [], // Island nation
+    languages: ['Icelandic'],
   },
    {
     id: 30,
     landmark: 'Cliffs of Moher',
     country: 'Ireland',
+    countryCode: 'IE',
     imageUrl: 'https://images.pexels.com/photos/2382681/pexels-photo-2382681.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hint: 'Sea cliffs located at the southwestern edge of the Burren region in County Clare.'
+    continent: 'Europe',
+    neighbors: ['United Kingdom (Northern Ireland)'], // Land border
+    languages: ['Irish', 'English'],
   },
    {
     id: 31,
     landmark: 'Belém Tower',
     country: 'Portugal',
+    countryCode: 'PT',
     imageUrl: 'https://images.pexels.com/photos/461936/pexels-photo-461936.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hint: 'A 16th-century fortification in Lisbon, a UNESCO World Heritage site.'
+    continent: 'Europe',
+    neighbors: ['Spain'],
+    languages: ['Portuguese'],
   },
    {
     id: 32,
     landmark: 'Wawel Castle',
     country: 'Poland',
-    imageUrl: 'https://images.pexels.com/photos/27034310/pexels-photo-27034310/free-photo-of-tower-of-traditional-castle.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A castle residency in Kraków that served as the seat of Polish kings.'
+    countryCode: 'PL',
+    imageUrl: 'https://images.pexels.com/photos/27034310/pexels-photo-27034310/free-photo-of-tower-of-traditional-castle.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', // Original: Generic tower. You might want a Wawel Castle image.
+    continent: 'Europe',
+    neighbors: ['Germany', 'Czech Republic', 'Slovakia', 'Ukraine', 'Belarus', 'Lithuania', 'Russia (Kaliningrad)'],
+    languages: ['Polish'],
   },
    {
     id: 33,
     landmark: 'Vasa Museum',
     country: 'Sweden',
-    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A maritime museum in Stockholm that houses the almost fully intact 17th-century ship Vasa.'
+    countryCode: 'SE',
+    imageUrl: 'https://images.pexels.com/photos/31979451/pexels-photo-31979451/free-photo-of-inside-hagia-sophia-with-people-and-chandelier.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', // Original: Same as Hagia Sophia. You might want a Vasa Museum image.
+    continent: 'Europe',
+    neighbors: ['Norway', 'Finland'],
+    languages: ['Swedish'],
   },
    {
     id: 34,
     landmark: 'Schönbrunn Palace',
     country: 'Austria',
+    countryCode: 'AT',
     imageUrl: 'https://images.pexels.com/photos/389865/pexels-photo-389865.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A former imperial summer residence in Vienna.'
+    continent: 'Europe',
+    neighbors: ['Germany', 'Czech Republic', 'Slovakia', 'Hungary', 'Slovenia', 'Italy', 'Switzerland', 'Liechtenstein'],
+    languages: ['German'],
   },
    {
     id: 35,
     landmark: 'Borobudur Temple',
     country: 'Indonesia',
+    countryCode: 'ID',
     imageUrl: 'https://images.pexels.com/photos/8775531/pexels-photo-8775531.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    hint: 'A 9th-century Mahayana Buddhist temple in Central Java.'
+    continent: 'Asia',
+    neighbors: ['Malaysia (on Borneo)', 'Papua New Guinea', 'Timor-Leste'],
+    languages: ['Indonesian'],
   },
 ];
 </file>
@@ -1035,8 +1264,14 @@ export interface LandmarkData {
   id: number;
   landmark: string;
   country: string;
+  countryCode: string; // ISO 3166-1 alpha-2 code (e.g., "FR", "US")
   imageUrl: string;
-  hint: string;
+  // hint?: string; // Deprecated or use as a general fallback if new hint types are missing
+
+  // New Hint Fields
+  continent?: string;
+  neighbors?: string[]; // Array of neighboring country names
+  languages?: string[]; // Array of primary languages
 }
 
 export interface CountryData {
@@ -1056,7 +1291,7 @@ export interface CountryFeature {
   };
   geometry: {
     type: string;
-    coordinates: number[][][];
+    coordinates: number[][][]; // Or any for more complex geometries
   };
 }
 </file>
@@ -1160,8 +1395,16 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    // Remove 'lucide-react' from exclude, or if it's the only one,
+    // you can remove the exclude array or the entire optimizeDeps section
+    // if this was its only purpose.
+    // For example:
+    // exclude: [], // if you have other exclusions you want to keep
+    // OR, if lucide-react was the only one:
   },
+  // If optimizeDeps was only for excluding lucide-react, you can remove
+  // the optimizeDeps key entirely:
+  // optimizeDeps: {}, // or just remove the key
 });
 </file>
 
@@ -1179,6 +1422,53 @@ export {
   vite_config_default as default
 };
 //# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvaG9tZS9wcm9qZWN0XCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCIvaG9tZS9wcm9qZWN0L3ZpdGUuY29uZmlnLnRzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9ob21lL3Byb2plY3Qvdml0ZS5jb25maWcudHNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlJztcbmltcG9ydCByZWFjdCBmcm9tICdAdml0ZWpzL3BsdWdpbi1yZWFjdCc7XG5cbi8vIGh0dHBzOi8vdml0ZWpzLmRldi9jb25maWcvXG5leHBvcnQgZGVmYXVsdCBkZWZpbmVDb25maWcoe1xuICBwbHVnaW5zOiBbcmVhY3QoKV0sXG4gIG9wdGltaXplRGVwczoge1xuICAgIGV4Y2x1ZGU6IFsnbHVjaWRlLXJlYWN0J10sXG4gIH0sXG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFBeU4sU0FBUyxvQkFBb0I7QUFDdFAsT0FBTyxXQUFXO0FBR2xCLElBQU8sc0JBQVEsYUFBYTtBQUFBLEVBQzFCLFNBQVMsQ0FBQyxNQUFNLENBQUM7QUFBQSxFQUNqQixjQUFjO0FBQUEsSUFDWixTQUFTLENBQUMsY0FBYztBQUFBLEVBQzFCO0FBQ0YsQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K
+</file>
+
+<file path="package.json">
+{
+  "name": "vite-react-typescript-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.0",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/d3-geo": "^3.1.0",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-zoom": "^3.0.8",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@types/topojson-client": "^3.1.4",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
 </file>
 
 </files>
